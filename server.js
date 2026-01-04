@@ -1,10 +1,9 @@
 import express from "express";
 import cors from "cors";
-import fetch from "node-fetch";
 
 const app = express();
 
-/* ✅ CORS FIX */
+/* CORS */
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST"],
@@ -13,18 +12,18 @@ app.use(cors({
 
 app.use(express.json());
 
-/* ✅ ROOT TEST */
+/* TEST ROUTE */
 app.get("/", (req, res) => {
   res.send("Apna AI backend is running 🚀");
 });
 
-/* ✅ CHAT API */
+/* CHAT ROUTE */
 app.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
 
     if (!userMessage) {
-      return res.status(400).json({ reply: "Message missing" });
+      return res.json({ reply: "Message empty hai" });
     }
 
     const response = await fetch(
@@ -34,9 +33,7 @@ app.post("/chat", async (req, res) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [
-            {
-              parts: [{ text: userMessage }]
-            }
+            { parts: [{ text: userMessage }] }
           ]
         })
       }
@@ -46,17 +43,17 @@ app.post("/chat", async (req, res) => {
 
     const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "AI se reply nahi mila 😔";
+      "AI se reply nahi mila";
 
     res.json({ reply });
 
-  } catch (error) {
-    console.error("AI ERROR:", error);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ reply: "Server error" });
   }
 });
 
-/* ✅ PORT FIX (RENDER) */
+/* PORT (Render fix) */
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log("Apna AI backend running on port", PORT);
