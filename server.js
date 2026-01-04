@@ -1,32 +1,39 @@
 import express from "express";
+import fetch from "node-fetch";
 import cors from "cors";
 
 const app = express();
-app.use(cors());
+
+/* 🔓 FULL CORS OPEN (Weebly + browser ke liye) */
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"]
+}));
+
 app.use(express.json());
 
-/* Root test */
+/* ✅ ROOT CHECK */
 app.get("/", (req, res) => {
-  res.send("✅ Apna AI backend is running 🚀");
+  res.send("Apna AI backend is running 🚀");
 });
 
-/* Chat API */
+/* ✅ CHAT API */
 app.post("/chat", async (req, res) => {
   try {
-    const { message } = req.body;
+    const userMessage = req.body.message;
 
-    if (!message) {
-      return res.status(400).json({ error: "Message is required" });
+    if (!userMessage) {
+      return res.status(400).json({ reply: "Message missing" });
     }
 
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" +
-        process.env.GEMINI_API_KEY,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: message }] }]
+          contents: [{ parts: [{ text: userMessage }] }]
         })
       }
     );
@@ -35,16 +42,17 @@ app.post("/chat", async (req, res) => {
 
     const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "No reply from AI";
+      "No response from AI";
 
     res.json({ reply });
-  } catch (err) {
-    console.error("AI ERROR:", err);
-    res.status(500).json({ error: "AI server error" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ reply: "Server error" });
   }
 });
 
-/* Render port fix */
+/* 🔌 RENDER PORT FIX */
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log("Apna AI backend running on port", PORT);
