@@ -1,9 +1,10 @@
 import express from "express";
 import cors from "cors";
+import fetch from "node-fetch";
 
 const app = express();
 
-// ✅ CORS – allow all (Weebly ke liye)
+/* ✅ CORS FIX */
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST"],
@@ -12,21 +13,22 @@ app.use(cors({
 
 app.use(express.json());
 
-// ✅ Root test route
+/* ✅ ROOT TEST */
 app.get("/", (req, res) => {
   res.send("Apna AI backend is running 🚀");
 });
 
-// ✅ Chat API
+/* ✅ CHAT API */
 app.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
+
     if (!userMessage) {
       return res.status(400).json({ reply: "Message missing" });
     }
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -44,7 +46,7 @@ app.post("/chat", async (req, res) => {
 
     const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "No response from AI";
+      "AI se reply nahi mila 😔";
 
     res.json({ reply });
 
@@ -54,7 +56,7 @@ app.post("/chat", async (req, res) => {
   }
 });
 
-// ✅ Render PORT fix
+/* ✅ PORT FIX (RENDER) */
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log("Apna AI backend running on port", PORT);
