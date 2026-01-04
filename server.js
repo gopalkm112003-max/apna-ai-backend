@@ -22,7 +22,7 @@ app.post("/chat", async (req, res) => {
     const message = req.body.message;
 
     if (!message) {
-      return res.json({ reply: "Message nahi mila" });
+      return res.json({ reply: "Message empty hai" });
     }
 
     const apiURL =
@@ -33,27 +33,35 @@ app.post("/chat", async (req, res) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [
-          { parts: [{ text: message }] }
+          {
+            role: "user",
+            parts: [{ text: message }]
+          }
         ]
       })
     });
 
     const data = await response.json();
 
-    const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "AI se reply nahi mila";
+    console.log("GEMINI RAW RESPONSE:", JSON.stringify(data));
+
+    let reply = "AI se reply nahi mila";
+
+    if (
+      data.candidates &&
+      data.candidates.length > 0 &&
+      data.candidates[0].content &&
+      data.candidates[0].content.parts &&
+      data.candidates[0].content.parts.length > 0
+    ) {
+      reply = data.candidates[0].content.parts[0].text;
+    }
 
     res.json({ reply });
 
-  } catch (error) {
-    console.error("AI ERROR:", error);
+  } catch (err) {
+    console.error("SERVER ERROR:", err);
     res.status(500).json({ reply: "Server error" });
   }
 });
 
-/* PORT */
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log("Apna AI backend running on port", PORT);
-});
