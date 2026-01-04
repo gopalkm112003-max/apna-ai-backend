@@ -3,7 +3,7 @@ import cors from "cors";
 
 const app = express();
 
-/* 🔓 FULL CORS OPEN (Weebly + browser ke liye) */
+// ✅ CORS – allow all (Weebly ke liye)
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST"],
@@ -12,16 +12,15 @@ app.use(cors({
 
 app.use(express.json());
 
-/* ✅ ROOT CHECK */
+// ✅ Root test route
 app.get("/", (req, res) => {
   res.send("Apna AI backend is running 🚀");
 });
 
-/* ✅ CHAT API */
+// ✅ Chat API
 app.post("/chat", async (req, res) => {
   try {
     const userMessage = req.body.message;
-
     if (!userMessage) {
       return res.status(400).json({ reply: "Message missing" });
     }
@@ -32,7 +31,11 @@ app.post("/chat", async (req, res) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: userMessage }] }]
+          contents: [
+            {
+              parts: [{ text: userMessage }]
+            }
+          ]
         })
       }
     );
@@ -46,12 +49,12 @@ app.post("/chat", async (req, res) => {
     res.json({ reply });
 
   } catch (error) {
-    console.error(error);
+    console.error("AI ERROR:", error);
     res.status(500).json({ reply: "Server error" });
   }
 });
 
-/* 🔌 RENDER PORT FIX */
+// ✅ Render PORT fix
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log("Apna AI backend running on port", PORT);
