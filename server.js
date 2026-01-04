@@ -1,29 +1,20 @@
 import express from "express";
 import cors from "cors";
-import fetch from "node-fetch";
 
 const app = express();
 
-// ✅ CORS fix (Weebly + browser)
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"]
-}));
-
+app.use(cors());
 app.use(express.json());
 
-// ✅ Home route (test)
 app.get("/", (req, res) => {
   res.send("Apna AI backend is running 🚀");
 });
 
-// ✅ Chat API
 app.post("/chat", async (req, res) => {
   try {
-    const userMessage = req.body.message;
+    const { message } = req.body;
 
-    if (!userMessage) {
+    if (!message) {
       return res.json({ reply: "Message empty hai" });
     }
 
@@ -34,7 +25,7 @@ app.post("/chat", async (req, res) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [
-            { parts: [{ text: userMessage }] }
+            { parts: [{ text: message }] }
           ]
         })
       }
@@ -48,13 +39,12 @@ app.post("/chat", async (req, res) => {
 
     res.json({ reply });
 
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ reply: "Server error" });
   }
 });
 
-// ✅ Render PORT fix
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log("Apna AI backend running on port", PORT);
