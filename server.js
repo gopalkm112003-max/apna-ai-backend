@@ -27,10 +27,11 @@ app.post("/chat", async (req, res) => {
 
     res.json({ reply });
   } catch (err) {
-    res.status(500).json({ error: "AI error" });
+   res.status(500).json({ error: err.message });
   }
 });
 
-app.listen(3000, () => {
-  console.log("Apna AI backend running");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("Apna AI backend running on port", PORT);
 });
