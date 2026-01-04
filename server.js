@@ -6,41 +6,47 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ HOME ROUTE (VERY IMPORTANT)
+// ✅ Home route (important)
 app.get("/", (req, res) => {
   res.send("Apna AI backend is running 🚀");
 });
 
-// ✅ CHAT ROUTE
+// ✅ Chat route
 app.post("/chat", async (req, res) => {
-  const userMessage = req.body.message;
-
   try {
+    const userMessage = req.body.message;
+
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" +
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" +
         process.env.GEMINI_API_KEY,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: userMessage }] }],
-        }),
+          contents: [
+            {
+              parts: [{ text: userMessage }]
+            }
+          ]
+        })
       }
     );
 
     const data = await response.json();
+
     const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "Sorry, reply nahi aa paya.";
 
     res.json({ reply });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ reply: "Server error" });
   }
 });
 
-// ✅ PORT FIX (RENDER REQUIRED)
-const PORT = process.env.PORT || 3000;
+// ✅ PORT fix (Render compatible)
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log("Apna AI backend running on port", PORT);
+  console.log("Apna AI backend running on port " + PORT);
 });
-
