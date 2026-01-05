@@ -3,181 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini 2.5 AI Chatbot</title>
+    <title>Professional AI Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #343541;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: white;
+        :root {
+            --bg-color: #f0f2f5;
+            --chat-bg: #ffffff;
+            --text-color: #1a1a1a;
+            --header-bg: #007bff;
+            --header-text: #ffffff;
+            --user-msg: #007bff;
+            --ai-msg: #f1f0f0;
+            --input-bg: #fff;
+            --accent: #0056b3;
         }
 
-        .chat-container {
-            width: 100%;
-            max-width: 700px;
-            height: 90vh;
-            background-color: #444654;
-            display: flex;
-            flex-direction: column;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            overflow: hidden;
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --chat-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --header-bg: #2c2c2c;
+            --user-msg: #3700b3;
+            --ai-msg: #333333;
+            --input-bg: #2c2c2c;
         }
 
-        .chat-header {
-            padding: 15px;
-            background-color: #202123;
-            text-align: center;
-            font-weight: bold;
-            border-bottom: 1px solid #565869;
-        }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg-color); margin: 0; display: flex; flex-direction: column; height: 100vh; color: var(--text-color); }
+        header { background: var(--header-bg); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .theme-btn { cursor: pointer; border: 1px solid white; background: transparent; color: white; padding: 5px 15px; border-radius: 20px; font-size: 12px; }
+        
+        #chat-window { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; max-width: 800px; margin: auto; width: 100%; }
+        .msg { max-width: 80%; padding: 12px 18px; border-radius: 20px; line-height: 1.6; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .user { align-self: flex-end; background: var(--user-msg); color: white; border-bottom-right-radius: 2px; }
+        .ai { align-self: flex-start; background: var(--ai-msg); color: var(--text-color); border-bottom-left-radius: 2px; }
 
-        #chat-box {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .message {
-            padding: 12px 16px;
-            border-radius: 10px;
-            max-width: 85%;
-            line-height: 1.5;
-            word-wrap: break-word;
-        }
-
-        .user-msg {
-            align-self: flex-end;
-            background-color: #0b141a;
-            color: #d1d5db;
-        }
-
-        .ai-msg {
-            align-self: flex-start;
-            background-color: #343541;
-            border: 1px solid #565869;
-        }
-
-        .input-area {
-            padding: 20px;
-            background-color: #444654;
-            display: flex;
-            gap: 10px;
-            border-top: 1px solid #565869;
-        }
-
-        input {
-            flex: 1;
-            padding: 12px;
-            border-radius: 6px;
-            border: none;
-            background-color: #40414f;
-            color: white;
-            outline: none;
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #10a37f;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        button:hover { background-color: #0e8c6d; }
-        button:disabled { background-color: #565869; }
+        footer { background: var(--chat-bg); padding: 15px; border-top: 1px solid #ddd; }
+        .input-box { max-width: 800px; margin: auto; display: flex; gap: 10px; }
+        input { flex: 1; padding: 12px 20px; border-radius: 30px; border: 1px solid #ccc; outline: none; background: var(--input-bg); color: var(--text-color); }
+        button#send { background: var(--header-bg); border: none; color: white; padding: 10px 25px; border-radius: 30px; cursor: pointer; font-weight: 600; }
+        button#send:hover { background: var(--accent); }
+        
+        .error-text { color: #ff4d4d; font-size: 12px; margin-top: 5px; text-align: center; }
+        .loader { font-style: italic; opacity: 0.7; font-size: 13px; }
     </style>
 </head>
-<body>
+<body data-theme="light">
 
-    <div class="chat-container">
-        <div class="chat-header">Gemini 2.5 AI Assistant</div>
-        <div id="chat-box">
-            <div class="message ai-msg">Namaste! Main naya Gemini AI hoon. Main aapki kaise madad kar sakta hoon?</div>
-        </div>
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Apna sawal likhein..." autocomplete="off">
-            <button id="send-btn">Send</button>
-        </div>
+<header>
+    <div><strong>🤖 My AI Studio</strong></div>
+    <button class="theme-btn" onclick="toggleTheme()">🌙 Switch Theme</button>
+</header>
+
+<div id="chat-window">
+    <div class="msg ai">Namaste! Main aapki kya madad kar sakta hoon?</div>
+</div>
+
+<footer>
+    <div class="input-box">
+        <input type="text" id="query" placeholder="Yahan sawal likhein..." autocomplete="off">
+        <button id="send">Bhejein</button>
     </div>
+    <div id="err-log" class="error-text"></div>
+    <div style="text-align: center; font-size: 10px; opacity: 0.5; margin-top: 10px;">Powered by Gemini 2.5/3 • 2026</div>
+</footer>
 
-    <script>
-        // 1. Aapki API Key (Yahan change mat kariye, ye sahi hai)
-        const API_KEY = "AIzaSyA_qpBdn1AHPXjRa-8M8FRPcdwIfoQyBJw"; 
+<script>
+    // --- SETTINGS ---
+    const API_KEY = "AIzaSyA_qpBdn1AHPXjRa-8M8FRPcdwIfoQyBJw";
+    
+    // Model change: 2026 ke liye 'gemini-3-flash' ya 'gemini-2.5-flash' ka use karein
+    const MODEL = "gemini-3-flash"; 
+    const API_URL = `https://generativelanguage.googleapis.com/v1/models/${MODEL}:generateContent?key=${API_KEY}`;
 
-        // 2. Updated API URL (v1 version aur gemini-2.5-flash model)
-        const MODEL_NAME = "gemini-2.5-flash"; 
-        const API_URL = `https://generativelanguage.googleapis.com/v1/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
+    const chat = document.getElementById('chat-window');
+    const input = document.getElementById('query');
+    const btn = document.getElementById('send');
+    const errLog = document.getElementById('err-log');
 
-        const chatBox = document.getElementById('chat-box');
-        const userInput = document.getElementById('user-input');
-        const sendBtn = document.getElementById('send-btn');
+    function toggleTheme() {
+        const b = document.body;
+        const current = b.getAttribute('data-theme');
+        b.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+    }
 
-        function appendMessage(role, text) {
-            const msgDiv = document.createElement('div');
-            msgDiv.classList.add('message');
-            msgDiv.classList.add(role === 'user' ? 'user-msg' : 'ai-msg');
-            msgDiv.innerText = text;
-            chatBox.appendChild(msgDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            return msgDiv;
-        }
+    function addMsg(role, text) {
+        const d = document.createElement('div');
+        d.className = `msg ${role}`;
+        d.innerText = text;
+        chat.appendChild(d);
+        chat.scrollTop = chat.scrollHeight;
+        return d;
+    }
 
-        async function fetchAIResponse(prompt) {
-            try {
-                const response = await fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
-                    })
-                });
+    async function callGemini(prompt) {
+        errLog.innerText = "";
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
 
-                const data = await response.json();
+            const data = await response.json();
 
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
-                    return data.candidates[0].content.parts[0].text;
-                } else if (data.error) {
-                    // Agar abhi bhi error aaye toh yahan dikhega
-                    return "Error: " + data.error.message;
-                } else {
-                    return "AI ne koi jawab nahi diya. Kripya dobara koshish karein.";
-                }
-            } catch (error) {
-                return "Technical Error: Check your connection.";
+            if (!response.ok) {
+                // Agar API error de rahi hai toh yahan dikhega
+                console.error("API Error:", data);
+                errLog.innerText = `Error: ${data.error ? data.error.message : 'Server Problem'}`;
+                return "Maaf kijiye, main abhi jawab nahi de sakta. (Error Code: " + response.status + ")";
             }
+
+            return data.candidates[0].content.parts[0].text;
+        } catch (e) {
+            console.error("Network Error:", e);
+            errLog.innerText = "Network issue: Internet check karein ya API Key block hai.";
+            return "Connection fail ho gaya.";
         }
+    }
 
-        async function handleChat() {
-            const message = userInput.value.trim();
-            if (!message) return;
+    async function handle() {
+        const q = input.value.trim();
+        if(!q) return;
 
-            sendBtn.disabled = true;
-            appendMessage('user', message);
-            userInput.value = "";
+        addMsg('user', q);
+        input.value = "";
+        btn.disabled = true;
 
-            const typingMsg = appendMessage('ai', "Thinking...");
+        const loading = addMsg('ai', "Thinking...");
+        loading.classList.add('loader');
 
-            const aiResponse = await fetchAIResponse(message);
-            typingMsg.innerText = aiResponse;
+        const ans = await callGemini(q);
+        loading.innerText = ans;
+        loading.classList.remove('loader');
+        
+        btn.disabled = false;
+        input.focus();
+    }
 
-            sendBtn.disabled = false;
-            userInput.focus();
-        }
+    btn.onclick = handle;
+    input.onkeypress = (e) => { if(e.key === 'Enter') handle(); };
+</script>
 
-        sendBtn.addEventListener('click', handleChat);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleChat();
-        });
-    </script>
 </body>
 </html>
