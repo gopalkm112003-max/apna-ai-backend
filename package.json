@@ -1,7 +1,7 @@
 {
-  "name": "my-ai-app",
+  "name": "gemini-ai-bot",
   "version": "1.0.0",
-  "description": "AI Chatbot using Gemini API",
+  "description": "Full stack AI Chatbot",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
