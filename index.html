@@ -50,7 +50,14 @@
     <script>
         // --- APNI API KEY YAHAN DALO ---
         const API_KEY = "AIzaSyB2dKW9Vx47OO151FAr9QKAOjciwI2Od5c"; 
-        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+        const API_URL = `// Is line ko replace karein apne code mein
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+// sendMessage function ke andar catch block ko aise badlein:
+} catch (error) {
+    console.error("Detailed Error:", error);
+    appendMessage('bot', "Galti: " + error.message + ". Console check karein (F12).");
+}`;
 
         const chatBox = document.getElementById('chat-box');
         const userInput = document.getElementById('user-input');
