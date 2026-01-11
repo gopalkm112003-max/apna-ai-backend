@@ -3,138 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini AI Assistant</title>
+    <title>My Personal AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #1f2937; }
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
-        .message-content { line-height: 1.6; }
-    </style>
 </head>
-<body class="bg-[#212121] text-white flex h-screen overflow-hidden font-sans">
+<body class="bg-[#212121] text-white h-screen flex flex-col">
 
-    <!-- Main Chat Area -->
-    <main class="flex-1 flex flex-col relative h-full">
-        <!-- Header -->
-        <header class="p-4 border-b border-gray-700 flex justify-between items-center bg-[#212121] shadow-md">
-            <h1 class="font-bold text-xl text-teal-400 ml-4">Gemini AI <span class="text-xs font-normal text-gray-400">v1.5 Flash</span></h1>
-        </header>
+    <header class="p-4 border-b border-gray-700 text-center font-bold text-xl text-teal-400 shadow-md">
+        My AI Assistant
+    </header>
 
-        <!-- Messages Container -->
-        <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-6 md:px-20 lg:px-60 pt-10">
-            <!-- AI Welcome Message -->
-            <div class="flex gap-4">
-                <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center shrink-0">G</div>
-                <div class="bg-gray-800 p-4 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm">
-                    Namaste! Main Gemini AI hu. Main aapki kaise madad kar sakta hu?
-                </div>
-            </div>
+    <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-4 md:px-40 lg:px-80">
+        <div class="flex gap-3">
+            <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center">AI</div>
+            <div class="bg-gray-800 p-3 rounded-lg max-w-[80%]">Namaste! Main aapki kya madad kar sakta hu?</div>
         </div>
+    </div>
 
-        <!-- Input Section -->
-        <div class="p-4 md:px-20 lg:px-60 bg-[#212121]">
-            <div class="relative flex items-end bg-[#2f2f2f] rounded-2xl border border-gray-600 focus-within:border-teal-500 shadow-2xl p-2">
-                <textarea id="user-input" rows="1" 
-                    class="w-full bg-transparent border-none focus:ring-0 text-white p-2 resize-none max-h-40" 
-                    placeholder="Message Gemini..."></textarea>
-                <button onclick="sendMessage()" id="send-btn" class="bg-white text-black p-2.5 rounded-xl hover:bg-teal-400 transition ml-2">
-                    <i class="fa-solid fa-arrow-up text-lg"></i>
-                </button>
-            </div>
-            <p class="text-[10px] text-gray-500 text-center mt-3 tracking-wide">Gemini can provide info. Double-check responses.</p>
+    <div class="p-4 md:px-40 lg:px-80 bg-[#212121]">
+        <div class="flex items-center bg-[#2f2f2f] rounded-xl border border-gray-600 p-2">
+            <input id="user-input" type="text" class="flex-1 bg-transparent border-none focus:ring-0 text-white p-2" placeholder="Kuch bhi puchiye...">
+            <button onclick="sendMessage()" class="bg-white text-black p-2 rounded-lg hover:bg-teal-400 transition">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
         </div>
-    </main>
+    </div>
 
     <script>
-        // --- APNI API KEY YAHAN DALO ---
-        const API_KEY = "AIzaSyB2dKW9Vx47OO151FAr9QKAOjciwI2Od5c"; 
-        const API_URL = `// Is line ko replace karein apne code mein
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-
-// sendMessage function ke andar catch block ko aise badlein:
-} catch (error) {
-    console.error("Detailed Error:", error);
-    appendMessage('bot', "Galti: " + error.message + ". Console check karein (F12).");
-}`;
-
-        const chatBox = document.getElementById('chat-box');
-        const userInput = document.getElementById('user-input');
-
         async function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text) return;
+            const input = document.getElementById('user-input');
+            const chatBox = document.getElementById('chat-box');
+            const message = input.value.trim();
 
-            // 1. User Message dikhao
-            appendMessage('user', text);
-            userInput.value = "";
-            userInput.style.height = 'auto';
+            if (!message) return;
 
-            // 2. Loading indicator dikhao
-            const loadingId = appendMessage('bot', 'AI soch raha hai...', true);
+            // User message dikhao
+            chatBox.innerHTML += `<div class="flex gap-3 flex-row-reverse">
+                <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">U</div>
+                <div class="bg-teal-700 p-3 rounded-lg max-w-[80%] text-right">${message}</div>
+            </div>`;
+            
+            input.value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // AI "Thinking"
+            const loadingId = "load-" + Date.now();
+            chatBox.innerHTML += `<div class="flex gap-3" id="${loadingId}">
+                <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center animate-pulse">AI</div>
+                <div class="bg-gray-800 p-3 rounded-lg animate-pulse">Soch raha hu...</div>
+            </div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // 3. API Call karein
-                const response = await fetch(API_URL, {
+                const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: text }] }]
-                    })
+                    body: JSON.stringify({ message: message })
                 });
 
                 const data = await response.json();
-                
-                // Loading hatao
                 document.getElementById(loadingId).remove();
 
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
-                    const aiResponse = data.candidates[0].content.parts[0].text;
-                    appendMessage('bot', aiResponse);
-                } else {
-                    throw new Error("Invalid Response");
-                }
-
+                chatBox.innerHTML += `<div class="flex gap-3">
+                    <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center">AI</div>
+                    <div class="bg-gray-800 p-3 rounded-lg max-w-[80%] whitespace-pre-wrap">${data.reply || data.error}</div>
+                </div>`;
             } catch (error) {
-                console.error(error);
                 document.getElementById(loadingId).remove();
-                appendMessage('bot', "Maaf kijiye, kuch error aa gaya. Check karein ki aapki API Key sahi hai ya nahi.");
+                alert("Connection error!");
             }
-        }
-
-        function appendMessage(role, text, isLoading = false) {
-            const id = 'msg-' + Math.random().toString(36).substr(2, 9);
-            const isBot = role === 'bot';
-            
-            const msgHtml = `
-                <div class="flex gap-4 ${!isBot ? 'flex-row-reverse' : ''}" id="${id}">
-                    <div class="w-8 h-8 rounded-full ${isBot ? 'bg-teal-600' : 'bg-purple-600'} flex items-center justify-center shrink-0 shadow-md">
-                        ${isBot ? 'G' : 'U'}
-                    </div>
-                    <div class="${isBot ? 'bg-gray-800 rounded-tl-none' : 'bg-teal-700 rounded-tr-none'} p-4 rounded-2xl max-w-[85%] shadow-sm ${isLoading ? 'animate-pulse' : ''}">
-                        <div class="message-content whitespace-pre-wrap">${text}</div>
-                    </div>
-                </div>
-            `;
-            
-            chatBox.insertAdjacentHTML('beforeend', msgHtml);
             chatBox.scrollTop = chatBox.scrollHeight;
-            return id;
         }
 
-        // Textarea auto-resize
-        userInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
-
-        // Enter press handling
-        userInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
+        // Enter key support
+        document.getElementById('user-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
         });
     </script>
 </body>
