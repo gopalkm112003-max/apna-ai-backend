@@ -3,115 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My AI Assistant</title>
+    <title>Gemini AI Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Custom scrollbar for a cleaner look */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #1f2937; }
         ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+        .message-content { line-height: 1.6; }
     </style>
 </head>
-<body class="bg-[#212121] text-white flex h-screen overflow-hidden">
-
-    <!-- Sidebar (History/Settings) -->
-    <aside class="w-64 bg-[#171717] hidden md:flex flex-col p-4 border-r border-gray-700">
-        <button class="flex items-center gap-3 border border-gray-600 rounded-md p-3 hover:bg-gray-800 transition">
-            <i class="fa-solid fa-plus text-sm"></i>
-            <span>New Chat</span>
-        </button>
-        
-        <div class="mt-8 flex-1 overflow-y-auto">
-            <p class="text-xs text-gray-500 font-bold mb-4">RECENT</p>
-            <div class="space-y-2">
-                <div class="p-2 hover:bg-gray-800 rounded cursor-pointer text-sm truncate">AI Project help...</div>
-                <div class="p-2 hover:bg-gray-800 rounded cursor-pointer text-sm truncate">How to code in JS?</div>
-                <div class="p-2 hover:bg-gray-800 rounded cursor-pointer text-sm truncate">Travel plan for Delhi</div>
-            </div>
-        </div>
-
-        <div class="mt-auto border-t border-gray-700 pt-4">
-            <button class="flex items-center gap-3 w-full p-2 hover:bg-gray-800 rounded">
-                <i class="fa-solid fa-gear"></i> Settings
-            </button>
-        </div>
-    </aside>
+<body class="bg-[#212121] text-white flex h-screen overflow-hidden font-sans">
 
     <!-- Main Chat Area -->
     <main class="flex-1 flex flex-col relative h-full">
         <!-- Header -->
-        <header class="p-4 border-b border-gray-700 flex justify-between items-center bg-[#212121]">
-            <h1 class="font-semibold text-lg">My AI v1.0</h1>
-            <button class="md:hidden text-gray-400 hover:text-white"><i class="fa-solid fa-bars"></i></button>
+        <header class="p-4 border-b border-gray-700 flex justify-between items-center bg-[#212121] shadow-md">
+            <h1 class="font-bold text-xl text-teal-400 ml-4">Gemini AI <span class="text-xs font-normal text-gray-400">v1.5 Flash</span></h1>
         </header>
 
         <!-- Messages Container -->
         <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-6 md:px-20 lg:px-60 pt-10">
             <!-- AI Welcome Message -->
             <div class="flex gap-4">
-                <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center">AI</div>
-                <div class="bg-gray-800 p-3 rounded-lg max-w-[80%]">
-                    Namaste! Main aapka AI assistant hu. Main aapki kaise madad kar sakta hu?
+                <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center shrink-0">G</div>
+                <div class="bg-gray-800 p-4 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm">
+                    Namaste! Main Gemini AI hu. Main aapki kaise madad kar sakta hu?
                 </div>
             </div>
         </div>
 
         <!-- Input Section -->
         <div class="p-4 md:px-20 lg:px-60 bg-[#212121]">
-            <div class="relative flex items-center bg-[#2f2f2f] rounded-xl border border-gray-600 focus-within:border-gray-400 shadow-xl p-2">
-                <textarea id="user-input" rows="1" class="w-full bg-transparent border-none focus:ring-0 text-white p-2 resize-none" placeholder="Ask anything..."></textarea>
-                <button onclick="sendMessage()" class="bg-white text-black p-2 rounded-lg hover:bg-gray-200 ml-2 transition">
-                    <i class="fa-solid fa-arrow-up"></i>
+            <div class="relative flex items-end bg-[#2f2f2f] rounded-2xl border border-gray-600 focus-within:border-teal-500 shadow-2xl p-2">
+                <textarea id="user-input" rows="1" 
+                    class="w-full bg-transparent border-none focus:ring-0 text-white p-2 resize-none max-h-40" 
+                    placeholder="Message Gemini..."></textarea>
+                <button onclick="sendMessage()" id="send-btn" class="bg-white text-black p-2.5 rounded-xl hover:bg-teal-400 transition ml-2">
+                    <i class="fa-solid fa-arrow-up text-lg"></i>
                 </button>
             </div>
-            <p class="text-[10px] text-gray-500 text-center mt-2">AI can make mistakes. Check important info.</p>
+            <p class="text-[10px] text-gray-500 text-center mt-3 tracking-wide">Gemini can provide info. Double-check responses.</p>
         </div>
     </main>
 
     <script>
-        function sendMessage() {
-            const input = document.getElementById('user-input');
-            const chatBox = document.getElementById('chat-box');
-            
-            if (input.value.trim() === "") return;
+        // --- APNI API KEY YAHAN DALO ---
+        const API_KEY = "AIzaSyB2dKW9Vx47OO151FAr9QKAOjciwI2Od5c"; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
-            // User Message UI
-            const userMsg = `<div class="flex gap-4 flex-row-reverse">
-                <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">U</div>
-                <div class="bg-gray-700 p-3 rounded-lg max-w-[80%] text-right">${input.value}</div>
-            </div>`;
-            
-            chatBox.innerHTML += userMsg;
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
 
-            // Simple "Thinking" placeholder
-            const thinkingMsg = `<div class="flex gap-4 animate-pulse" id="temp-bot">
-                <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center">AI</div>
-                <div class="bg-gray-800 p-3 rounded-lg">AI is thinking...</div>
-            </div>`;
-            chatBox.innerHTML += thinkingMsg;
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
 
-            // Scroll to bottom
-            chatBox.scrollTop = chatBox.scrollHeight;
+            // 1. User Message dikhao
+            appendMessage('user', text);
+            userInput.value = "";
+            userInput.style.height = 'auto';
 
-            // Simulate AI Response (Yahan aap apna API connect karenge)
-            setTimeout(() => {
-                document.getElementById('temp-bot').remove();
-                const botMsg = `<div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center">AI</div>
-                    <div class="bg-gray-800 p-3 rounded-lg max-w-[80%]">
-                        Maine aapka sandesh "${input.value}" prapt kar liya hai. Abhi main development phase mein hu, isliye main simple responses de raha hu.
-                    </div>
-                </div>`;
-                chatBox.innerHTML += botMsg;
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }, 1000);
+            // 2. Loading indicator dikhao
+            const loadingId = appendMessage('bot', 'AI soch raha hai...', true);
 
-            input.value = "";
+            try {
+                // 3. API Call karein
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: text }] }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Loading hatao
+                document.getElementById(loadingId).remove();
+
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    const aiResponse = data.candidates[0].content.parts[0].text;
+                    appendMessage('bot', aiResponse);
+                } else {
+                    throw new Error("Invalid Response");
+                }
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById(loadingId).remove();
+                appendMessage('bot', "Maaf kijiye, kuch error aa gaya. Check karein ki aapki API Key sahi hai ya nahi.");
+            }
         }
 
-        // Enter key se send karne ke liye
-        document.getElementById('user-input').addEventListener('keypress', function (e) {
+        function appendMessage(role, text, isLoading = false) {
+            const id = 'msg-' + Math.random().toString(36).substr(2, 9);
+            const isBot = role === 'bot';
+            
+            const msgHtml = `
+                <div class="flex gap-4 ${!isBot ? 'flex-row-reverse' : ''}" id="${id}">
+                    <div class="w-8 h-8 rounded-full ${isBot ? 'bg-teal-600' : 'bg-purple-600'} flex items-center justify-center shrink-0 shadow-md">
+                        ${isBot ? 'G' : 'U'}
+                    </div>
+                    <div class="${isBot ? 'bg-gray-800 rounded-tl-none' : 'bg-teal-700 rounded-tr-none'} p-4 rounded-2xl max-w-[85%] shadow-sm ${isLoading ? 'animate-pulse' : ''}">
+                        <div class="message-content whitespace-pre-wrap">${text}</div>
+                    </div>
+                </div>
+            `;
+            
+            chatBox.insertAdjacentHTML('beforeend', msgHtml);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return id;
+        }
+
+        // Textarea auto-resize
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // Enter press handling
+        userInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
