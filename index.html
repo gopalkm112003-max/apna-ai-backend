@@ -1,58 +1,60 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Personal AI</title>
+    <title>My AI Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .chat-container { height: calc(100vh - 160px); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #4a5568; border-radius: 10px; }
+    </style>
 </head>
-<body class="bg-[#212121] text-white h-screen flex flex-col">
+<body class="bg-[#1a1a1a] text-white font-sans overflow-hidden">
 
-    <header class="p-4 border-b border-gray-700 text-center font-bold text-xl text-teal-400 shadow-md">
-        My AI Assistant
-    </header>
+    <div class="max-w-4xl mx-auto h-screen flex flex-col">
+        <!-- Header -->
+        <header class="p-6 text-center border-b border-gray-700">
+            <h1 class="text-2xl font-bold text-teal-400">Personal AI v2</h1>
+        </header>
 
-    <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-4 md:px-40 lg:px-80">
-        <div class="flex gap-3">
-            <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center">AI</div>
-            <div class="bg-gray-800 p-3 rounded-lg max-w-[80%]">Namaste! Main aapki kya madad kar sakta hu?</div>
+        <!-- Chat Area -->
+        <div id="chat-box" class="chat-container overflow-y-auto p-4 space-y-4">
+            <div class="flex gap-3">
+                <div class="w-9 h-9 bg-teal-600 rounded-full flex items-center justify-center shrink-0">AI</div>
+                <div class="bg-gray-800 p-3 rounded-2xl rounded-tl-none max-w-[80%]">
+                    Hello! Main aapki kya madad kar sakta hoon?
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="p-4 md:px-40 lg:px-80 bg-[#212121]">
-        <div class="flex items-center bg-[#2f2f2f] rounded-xl border border-gray-600 p-2">
-            <input id="user-input" type="text" class="flex-1 bg-transparent border-none focus:ring-0 text-white p-2" placeholder="Kuch bhi puchiye...">
-            <button onclick="sendMessage()" class="bg-white text-black p-2 rounded-lg hover:bg-teal-400 transition">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
+        <!-- Input Area -->
+        <div class="p-4 bg-[#1a1a1a] border-t border-gray-800">
+            <div class="flex gap-2 max-w-3xl mx-auto bg-gray-800 p-2 rounded-xl border border-gray-700 focus-within:border-teal-500">
+                <input id="user-input" type="text" placeholder="Type a message..." 
+                    class="flex-1 bg-transparent border-none focus:ring-0 p-2 outline-none">
+                <button onclick="sendMessage()" class="bg-teal-500 hover:bg-teal-600 text-white px-4 py-2 rounded-lg transition">
+                    Send
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
-        async function sendMessage() {
-            const input = document.getElementById('user-input');
-            const chatBox = document.getElementById('chat-box');
-            const message = input.value.trim();
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
 
+        async function sendMessage() {
+            const message = userInput.value.trim();
             if (!message) return;
 
-            // User message dikhao
-            chatBox.innerHTML += `<div class="flex gap-3 flex-row-reverse">
-                <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">U</div>
-                <div class="bg-teal-700 p-3 rounded-lg max-w-[80%] text-right">${message}</div>
-            </div>`;
-            
-            input.value = "";
-            chatBox.scrollTop = chatBox.scrollHeight;
+            // User message
+            addMessage('user', message);
+            userInput.value = '';
 
-            // AI "Thinking"
-            const loadingId = "load-" + Date.now();
-            chatBox.innerHTML += `<div class="flex gap-3" id="${loadingId}">
-                <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center animate-pulse">AI</div>
-                <div class="bg-gray-800 p-3 rounded-lg animate-pulse">Soch raha hu...</div>
-            </div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
+            // Loading state
+            const loadingId = addMessage('bot', 'AI is thinking...');
 
             try {
                 const response = await fetch('/api/chat', {
@@ -64,21 +66,36 @@
                 const data = await response.json();
                 document.getElementById(loadingId).remove();
 
-                chatBox.innerHTML += `<div class="flex gap-3">
-                    <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center">AI</div>
-                    <div class="bg-gray-800 p-3 rounded-lg max-w-[80%] whitespace-pre-wrap">${data.reply || data.error}</div>
-                </div>`;
+                if (data.reply) {
+                    addMessage('bot', data.reply);
+                } else {
+                    addMessage('bot', "Error: " + (data.error || "Unknown issue"));
+                }
             } catch (error) {
                 document.getElementById(loadingId).remove();
-                alert("Connection error!");
+                addMessage('bot', "Connection Error! Make sure your API key is set in Render.");
+                console.error(error);
             }
-            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // Enter key support
-        document.getElementById('user-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
+        function addMessage(role, text) {
+            const id = 'msg-' + Math.random().toString(36).substr(2, 9);
+            const isBot = role === 'bot';
+            const html = `
+                <div class="flex gap-3 ${isBot ? '' : 'flex-row-reverse'}" id="${id}">
+                    <div class="w-9 h-9 ${isBot ? 'bg-teal-600' : 'bg-blue-600'} rounded-full flex items-center justify-center shrink-0">
+                        ${isBot ? 'AI' : 'Me'}
+                    </div>
+                    <div class="${isBot ? 'bg-gray-800 rounded-tl-none' : 'bg-teal-700 rounded-tr-none'} p-3 rounded-2xl max-w-[80%] whitespace-pre-wrap">
+                        ${text}
+                    </div>
+                </div>`;
+            chatBox.insertAdjacentHTML('beforeend', html);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return id;
+        }
+
+        userInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
     </script>
 </body>
 </html>
